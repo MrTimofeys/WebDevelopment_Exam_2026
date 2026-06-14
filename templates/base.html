@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Электронная библиотека{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="{{ url_for('index') }}">Электронная библиотека</a>
+        <nav>
+            <a href="{{ url_for('index') }}">Книги</a>
+            {% if current_user.is_authenticated and current_user.has_role('admin') %}
+                <a href="{{ url_for('book_create') }}">Добавить книгу</a>
+                <a href="{{ url_for('users') }}">Пользователи</a>
+            {% endif %}
+        </nav>
+        <div class="session">
+            {% if current_user.is_authenticated %}
+                <span>{{ current_user.full_name }} ({{ current_user.role.title }})</span>
+                <a class="button ghost" href="{{ url_for('logout') }}">Выйти</a>
+            {% else %}
+                <a class="button" href="{{ url_for('login') }}">Войти</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alerts">
+                    {% for category, message in messages %}
+                        <div class="alert {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="footer">
+        <span>Мельников Тимофей, группа 241-3211</span>
+    </footer>
+    <script>
+        document.addEventListener("click", (event) => {
+            const openButton = event.target.closest("[data-modal-target]");
+            if (openButton) {
+                const modal = document.getElementById(openButton.dataset.modalTarget);
+                if (modal) {
+                    modal.showModal();
+                }
+            }
+
+            if (event.target.matches("[data-modal-close]")) {
+                event.target.closest("dialog")?.close();
+            }
+        });
+
+        document.addEventListener("change", (event) => {
+            if (!event.target.matches(".file-input")) {
+                return;
+            }
+            const field = event.target.closest(".field");
+            const fileName = field?.querySelector("[data-file-name]");
+            if (fileName) {
+                fileName.textContent = event.target.files?.[0]?.name || "Файл не выбран";
+            }
+        });
+    </script>
+</body>
+</html>

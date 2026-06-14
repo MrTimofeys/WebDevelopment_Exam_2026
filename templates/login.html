@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+<section class="auth-page">
+    <form class="form-card auth-card" method="post">
+        <header class="auth-head">
+            <h1>Вход</h1>
+        </header>
+        <div class="field">
+            <label for="login">Логин</label>
+            <input id="login" name="login" required autofocus>
+        </div>
+        <div class="field">
+            <label for="password">Пароль</label>
+            <input id="password" name="password" type="password" required>
+        </div>
+        <label class="checkbox-field" for="remember">
+            <input id="remember" name="remember" type="checkbox" value="1">
+            <span>Запомнить меня</span>
+        </label>
+        <button class="button" type="submit">Войти</button>
+    </form>
+</section>
+{% endblock %}

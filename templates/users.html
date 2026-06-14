@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Пользователи{% endblock %}
+
+{% block content %}
+<section class="page-head">
+    <div>
+        <h1>Пользователи</h1>
+        <p>Регистрация пользователей доступна администратору.</p>
+    </div>
+    <a class="button" href="{{ url_for('user_create') }}">Добавить пользователя</a>
+</section>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ФИО</th>
+            <th>Логин</th>
+            <th>Роль</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+            <tr>
+                <td>{{ user.full_name }}</td>
+                <td>{{ user.login }}</td>
+                <td>{{ user.role.title }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}{{ book.title }}{% endblock %}
+
+{% block content %}
+<article class="detail">
+    <img class="detail-cover" src="{{ url_for('static', filename='uploads/cover/' ~ book.cover_filename) }}" alt="Обложка {{ book.title }}">
+    <div>
+        <h1>{{ book.title }}</h1>
+        <dl class="meta wide">
+            <div><dt>Автор</dt><dd>{{ book.author }}</dd></div>
+            <div><dt>Жанры</dt><dd>{{ book.genre_names }}</dd></div>
+            <div><dt>Год выпуска</dt><dd>{{ book.year }}</dd></div>
+            <div><dt>Издательство</dt><dd>{{ book.publisher }}</dd></div>
+            <div><dt>Объём</dt><dd>{{ book.pages }} стр.</dd></div>
+            <div><dt>Средняя оценка</dt><dd>{{ book.average_rating if book.average_rating is not none else 'нет оценок' }}</dd></div>
+        </dl>
+        <div class="description markdown">{{ book.description|markdown }}</div>
+        {% if current_user.is_authenticated and current_user.has_role('admin', 'moderator') %}
+            <div class="inline-actions">
+                <a class="button" href="{{ url_for('book_edit', book_id=book.id) }}">Редактировать</a>
+                {% if current_user.has_role('admin') %}
+                    <button class="button danger" type="button" data-modal-target="delete-book-{{ book.id }}">Удалить</button>
+                    <dialog class="modal" id="delete-book-{{ book.id }}">
+                        <form method="dialog" class="modal-card">
+                            <h2>Удаление книги</h2>
+                            <p>Вы уверены, что хотите удалить книгу {{ book.title }}?</p>
+                            <div class="inline-actions">
+                                <button class="button ghost" type="button" data-modal-close>Нет</button>
+                                <button class="button danger" type="submit" form="delete-book-form-{{ book.id }}">Да</button>
+                            </div>
+                        </form>
+                        <form id="delete-book-form-{{ book.id }}" method="post" action="{{ url_for('book_delete', book_id=book.id) }}"></form>
+                    </dialog>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</article>
+
+<section class="reviews">
+    <h2>Рецензии</h2>
+    {% if current_user.is_authenticated and not user_review %}
+        <div class="inline-actions review-action">
+            <a class="button" href="{{ url_for('review_create', book_id=book.id) }}">Написать рецензию</a>
+        </div>
+    {% elif current_user.is_authenticated %}
+        <article class="review own-review">
+            <header>
+                <strong>Ваша рецензия</strong>
+                <span>оценка {{ user_review.rating }} / 5</span>
+                <time datetime="{{ user_review.created_at.isoformat() }}">{{ user_review.created_at.strftime('%d.%m.%Y %H:%M') }}</time>
+            </header>
+            <div class="markdown">{{ user_review.text|markdown }}</div>
+        </article>
+    {% else %}
+        <p class="hint"><a href="{{ url_for('login', next=request.path) }}">Войдите</a>, чтобы оставить рецензию.</p>
+    {% endif %}
+
+    {% for review in book.reviews|sort(attribute='created_at', reverse=true) %}
+        <article class="review">
+            <header>
+                <strong>{{ review.user.full_name }}</strong>
+                <span>оценка {{ review.rating }} / 5</span>
+                <time datetime="{{ review.created_at.isoformat() }}">{{ review.created_at.strftime('%d.%m.%Y %H:%M') }}</time>
+            </header>
+            <div class="markdown">{{ review.text|markdown }}</div>
+            {% if current_user.is_authenticated and current_user.has_role('admin', 'moderator') %}
+                <button class="button danger compact" type="button" data-modal-target="delete-review-{{ review.id }}">Удалить рецензию</button>
+                <dialog class="modal" id="delete-review-{{ review.id }}">
+                    <form method="dialog" class="modal-card">
+                        <h2>Удаление рецензии</h2>
+                        <p>Вы уверены, что хотите удалить эту рецензию?</p>
+                        <div class="inline-actions">
+                            <button class="button ghost" type="button" data-modal-close>Нет</button>
+                            <button class="button danger" type="submit" form="delete-review-form-{{ review.id }}">Да</button>
+                        </div>
+                    </form>
+                    <form id="delete-review-form-{{ review.id }}" method="post" action="{{ url_for('review_delete', review_id=review.id) }}"></form>
+                </dialog>
+            {% endif %}
+        </article>
+    {% else %}
+        <p class="empty">Рецензий пока нет.</p>
+    {% endfor %}
+</section>
+{% endblock %}

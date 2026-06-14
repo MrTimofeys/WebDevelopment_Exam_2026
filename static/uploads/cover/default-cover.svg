@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="520" viewBox="0 0 360 520">
+<rect width="360" height="520" fill="#f2eadf"/>
+<rect x="34" y="38" width="292" height="444" rx="8" fill="#244247"/>
+<rect x="58" y="72" width="244" height="90" rx="6" fill="#e9c46a"/>
+<rect x="76" y="208" width="208" height="12" fill="#f2eadf"/>
+<rect x="76" y="242" width="170" height="12" fill="#f2eadf"/>
+<rect x="76" y="276" width="196" height="12" fill="#f2eadf"/>
+<text x="180" y="128" font-family="Arial, sans-serif" font-size="28" text-anchor="middle" fill="#244247">BOOK</text>
+</svg>

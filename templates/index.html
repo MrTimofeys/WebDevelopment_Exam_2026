@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Книги{% endblock %}
+
+{% block content %}
+<section class="page-head">
+    <div>
+        <h1>Книги</h1>
+        <p>Каталог книг с поиском и рецензиями читателей.</p>
+    </div>
+</section>
+
+<form class="search-panel" method="get">
+    <div class="field">
+        <label for="title">Название</label>
+        <input id="title" name="title" value="{{ filters.title }}" placeholder="Например, Дюна">
+    </div>
+    <div class="field">
+        <label for="author">Автор</label>
+        <input id="author" name="author" value="{{ filters.author }}" placeholder="Фамилия или имя">
+    </div>
+    <div class="field">
+        <label for="genres">Жанры</label>
+        <select id="genres" name="genres" multiple size="4">
+            {% for genre in genres %}
+                <option value="{{ genre.id }}" {% if genre.id in filters.genres %}selected{% endif %}>{{ genre.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="field">
+        <label>Год выпуска</label>
+        <select id="years" name="years" multiple size="4">
+            {% for year in years %}
+                <option value="{{ year }}" {% if year in filters.years %}selected{% endif %}>{{ year }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="field range">
+        <label>Количество страниц</label>
+        <input name="pages_from" inputmode="numeric" value="{{ filters.pages_from or '' }}" placeholder="от">
+        <input name="pages_to" inputmode="numeric" value="{{ filters.pages_to or '' }}" placeholder="до">
+    </div>
+    <div class="search-actions">
+        <button class="button" type="submit">Найти</button>
+        <a class="button ghost" href="{{ url_for('index') }}">Сбросить</a>
+    </div>
+</form>
+
+{% if books.items %}
+    <div class="book-list">
+        {% for book, avg_rating, review_count in books.items %}
+            <article class="book-row">
+                <a class="cover-link" href="{{ url_for('book_detail', book_id=book.id) }}">
+                    <img class="cover" src="{{ url_for('static', filename='uploads/cover/' ~ book.cover_filename) }}" alt="Обложка {{ book.title }}">
+                </a>
+                <div class="book-info">
+                    <h2><a href="{{ url_for('book_detail', book_id=book.id) }}">{{ book.title }}</a></h2>
+                    <dl class="meta">
+                        <div><dt>Автор</dt><dd>{{ book.author }}</dd></div>
+                        <div><dt>Жанры</dt><dd>{{ book.genre_names }}</dd></div>
+                        <div><dt>Год</dt><dd>{{ book.year }}</dd></div>
+                        <div><dt>Страниц</dt><dd>{{ book.pages }}</dd></div>
+                    </dl>
+                    <p>{{ book.description }}</p>
+                    <div class="rating">
+                        {% if review_count %}
+                            Средняя оценка: <strong>{{ avg_rating }}</strong> / 5, рецензий: {{ review_count }}
+                        {% else %}
+                            Рецензий пока нет
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row-actions">
+                    <a class="button ghost" href="{{ url_for('book_detail', book_id=book.id) }}">Просмотр</a>
+                    {% if current_user.is_authenticated and current_user.has_role('admin', 'moderator') %}
+                        <a class="button ghost" href="{{ url_for('book_edit', book_id=book.id) }}">Редактировать</a>
+                        {% if current_user.has_role('admin') %}
+                            <button class="button danger" type="button" data-modal-target="delete-book-{{ book.id }}">Удалить</button>
+                            <dialog class="modal" id="delete-book-{{ book.id }}">
+                                <form method="dialog" class="modal-card">
+                                    <h2>Удаление книги</h2>
+                                    <p>Вы уверены, что хотите удалить книгу {{ book.title }}?</p>
+                                    <div class="inline-actions">
+                                        <button class="button ghost" type="button" data-modal-close>Нет</button>
+                                        <button class="button danger" type="submit" form="delete-book-form-{{ book.id }}">Да</button>
+                                    </div>
+                                </form>
+                                <form id="delete-book-form-{{ book.id }}" method="post" action="{{ url_for('book_delete', book_id=book.id) }}"></form>
+                            </dialog>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+
+    <nav class="pagination">
+        {% set args = request.args.to_dict(flat=False) %}
+        {% if books.has_prev %}
+            {% set _ = args.update({'page': [books.prev_num|string]}) %}
+            <a href="{{ url_for('index', **args) }}">Назад</a>
+        {% endif %}
+        <span>Страница {{ books.page }} из {{ books.pages }}</span>
+        {% if books.has_next %}
+            {% set _ = args.update({'page': [books.next_num|string]}) %}
+            <a href="{{ url_for('index', **args) }}">Вперёд</a>
+        {% endif %}
+    </nav>
+    {% if current_user.is_authenticated and current_user.has_role('admin') %}
+        <div class="catalog-actions">
+            <a class="button" href="{{ url_for('book_create') }}">Добавить книгу</a>
+        </div>
+    {% endif %}
+{% else %}
+    <p class="empty">По выбранным условиям книг не найдено.</p>
+    {% if current_user.is_authenticated and current_user.has_role('admin') %}
+        <div class="catalog-actions">
+            <a class="button" href="{{ url_for('book_create') }}">Добавить книгу</a>
+        </div>
+    {% endif %}
+{% endif %}
+{% endblock %}

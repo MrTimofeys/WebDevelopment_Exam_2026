@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+instance/
+library.sqlite3
+*.sqlite3.bak-*
+.DS_Store
+static/uploads/cover/*
+!static/uploads/cover/default-cover.svg

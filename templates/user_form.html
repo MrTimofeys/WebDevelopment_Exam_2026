@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Новый пользователь{% endblock %}
+
+{% block content %}
+<h1>Новый пользователь</h1>
+<form class="form-card small" method="post">
+    <div class="field">
+        <label for="last_name">Фамилия *</label>
+        <input id="last_name" name="last_name" required>
+    </div>
+    <div class="field">
+        <label for="first_name">Имя *</label>
+        <input id="first_name" name="first_name" required>
+    </div>
+    <div class="field">
+        <label for="middle_name">Отчество</label>
+        <input id="middle_name" name="middle_name">
+    </div>
+    <div class="field">
+        <label for="login">Логин *</label>
+        <input id="login" name="login" required>
+    </div>
+    <div class="field">
+        <label for="password">Пароль *</label>
+        <input id="password" name="password" type="password" required>
+    </div>
+    <div class="field">
+        <label for="role_id">Роль *</label>
+        <select id="role_id" name="role_id" required>
+            {% for role in roles %}
+                <option value="{{ role.id }}">{{ role.title }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="inline-actions">
+        <button class="button" type="submit">Создать</button>
+        <a class="button ghost" href="{{ url_for('users') }}">Отмена</a>
+    </div>
+</form>
+{% endblock %}

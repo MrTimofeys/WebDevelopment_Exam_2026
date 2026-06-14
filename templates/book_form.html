@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Редактирование книги' if book else 'Добавление книги' }}{% endblock %}
+
+{% block content %}
+<h1>{{ 'Редактирование книги' if book else 'Добавление книги' }}</h1>
+<form class="form-card" method="post" {% if not book %}enctype="multipart/form-data"{% endif %}>
+    <div class="field">
+        <label for="title">Название *</label>
+        <input id="title" name="title" required value="{{ book.title if book else request.form.get('title', '') }}">
+    </div>
+    <div class="field">
+        <label for="author">Автор *</label>
+        <input id="author" name="author" required value="{{ book.author if book else request.form.get('author', '') }}">
+    </div>
+    <div class="field">
+        <label for="genre_ids">Жанры *</label>
+        <select id="genre_ids" name="genre_ids" multiple size="6" required>
+            {% for genre in genres %}
+                <option value="{{ genre.id }}" {% if genre.id in selected_genre_ids %}selected{% endif %}>{{ genre.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="field">
+        <label for="year">Год выпуска *</label>
+        <input id="year" name="year" type="number" min="1" required value="{{ book.year if book else request.form.get('year', '') }}">
+    </div>
+    <div class="field">
+        <label for="publisher">Издательство *</label>
+        <input id="publisher" name="publisher" required value="{{ book.publisher if book else request.form.get('publisher', '') }}">
+    </div>
+    <div class="field">
+        <label for="pages">Количество страниц *</label>
+        <input id="pages" name="pages" type="number" min="1" required value="{{ book.pages if book else request.form.get('pages', '') }}">
+    </div>
+    <div class="field">
+        <label for="description">Описание *</label>
+        <textarea id="description" name="description" rows="7" required>{{ book.description if book else request.form.get('description', '') }}</textarea>
+    </div>
+    {% if not book %}
+        <div class="field">
+            <label for="cover">Обложка *</label>
+            <input class="file-input" id="cover" name="cover" type="file" accept=".png,.jpg,.jpeg,.gif,.webp,.svg" required>
+            <label class="file-control" for="cover">
+                <span class="file-button">Выбрать файл</span>
+                <span class="file-name" data-file-name>Файл не выбран</span>
+            </label>
+        </div>
+    {% endif %}
+    <div class="inline-actions">
+        <button class="button" type="submit">Сохранить</button>
+        <a class="button ghost" href="{{ url_for('index') }}">Отмена</a>
+    </div>
+</form>
+{% endblock %}
